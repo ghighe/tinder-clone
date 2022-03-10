@@ -333,3 +333,29 @@ nav .nav-button:disabled {
 .img-container img {
     width: 100%;
 }
+
+.chat-input {
+padding:20px;
+display: flex;
+flex-direction:column;
+width:100px;
+}
+
+.chat-input button {
+margin-top:10px;
+text-align: center;
+}
+
+.chat-input textarea {
+    height:80px;
+    width:100%;
+}
+
+
+/* chatDisplay */
+.chat-display {
+    padding: 20px;
+    height: 60vh;
+    overflow-y:auto;
+
+}
