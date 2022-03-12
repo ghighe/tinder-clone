@@ -1,6 +1,8 @@
+/* eslint-disable no-unused-vars */
 import axios from "axios";
 import { useState } from "react";
 import {useNavigate} from 'react-router-dom'
+import { useCookies  } from 'react-cookie';
 
 
 export const AuthModal = ({setShowModal,isSignUp}) => {
@@ -8,6 +10,7 @@ export const AuthModal = ({setShowModal,isSignUp}) => {
     const [password,setPassword] = useState(null);
     const [confirmPassword, setConfirmPassword] = useState(null);
     const [error, setError] = useState(null);
+    const [cookies,setCookie,removeCookie] = useCookies(['user']);
 
     let navigate = useNavigate();
     console.log(email,password,confirmPassword,error);
@@ -25,10 +28,17 @@ export const AuthModal = ({setShowModal,isSignUp}) => {
                 return
             }
 
-            const response = await axios.post("http://localhost:10000/signup", {email,password});
+            const response = await axios.post(`http://localhost:10000/${isSignUp ? 'signup': 'login'}`, {email,password});
+            console.log(response);
             const success = response.status === 201
 
-            if(success) navigate('/onboarding');
+            // setCookie('Email', response.data.email);
+            setCookie('UserId', response.data.userId);
+            setCookie('AuthToken', response.data.token);
+
+
+            if(success && isSignUp) navigate('/onboarding');
+            if(success && !isSignUp) navigate('/dashboard');
 
         }catch(error){
             console.log(error);

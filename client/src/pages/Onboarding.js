@@ -1,10 +1,14 @@
+/* eslint-disable no-unused-vars */
 import { useState } from "react";
 import { Nav } from "../components/Nav";
+import { useCookies } from "react-cookie";
+import axios from "axios";
+import {useNavigate} from 'react-router-dom'
 
 export const Onboarding = () => {
-
+  const [cookies,setCookie,removeCookie] = useCookies(['user'])
   const [formData, setFormData] = useState({
-    user_id:'',
+    user_id:cookies.UserId,
     first_name:'',
     dob_day:'',
     dob_month:'',
@@ -17,9 +21,20 @@ export const Onboarding = () => {
     about:'',
     matches:[]
   })
+
+  const navigate = useNavigate();
   //handle submit function
-  const handleSubmit = () => {
-    console.log("Submit");
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    try {
+      //make a put request with axios to /users and placed formData as payload
+      const response = await axios.put(`http://localhost:10000/user`, {formData});
+      const success = response.status === 200;
+      if(success) navigate('/dashboard');
+    } catch (error) {
+      console.log(error);
+    }
 
   };
 
@@ -181,8 +196,9 @@ export const Onboarding = () => {
               onChange={handleChange}
               required={true}
             />
-            <div className="photo-container"></div>
+            {formData.url && <div className="photo-container">
               <img src={formData.url} alt="No_picture" />
+            </div>}
           </section>
         </form>
       </div>
