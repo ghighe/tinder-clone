@@ -1,8 +1,46 @@
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable no-unused-vars */
 import TinderCard from "react-tinder-card";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import {useCookies} from "react-cookie";
 import { ChatContainer } from "../components/ChatContainer";
+import axios from "axios";
 
 export const Dashboard = () => {
+  const [user, setUser] = useState(null);
+  const [genderedUsers, setGenderedUsers] = useState(null);
+  const [cookies, setCookie, removeCookie] = useCookies(['user']);
+
+const userId = cookies.UserId;
+//get user from the backend
+const getUser = async() => {
+  try {
+    const response = await axios.get(`http://localhost:10000/user/${userId}`);
+    setUser(response.data);
+  } catch (error) {
+    console.log(error)
+  }
+}
+
+const getGenderedUsers = async() => {
+    try {
+      const response = await axios.get(`http://localhost:10000/gendered-user/${user?.gender_interest}`);
+      setGenderedUsers(response.data);
+    } catch (error) {
+      console.log(error);
+    }
+}
+
+  //call useEffect everytime the user change
+  useEffect(() => {
+      getUser();
+      getGenderedUsers();
+  },[user,genderedUsers])
+
+
+
+
+
   const characters = [
     {
       name: "Richard Hendricks",
@@ -37,8 +75,10 @@ export const Dashboard = () => {
   };
 
   return (
+    <>
+    {user &&
     <div className="dashboard">
-      <ChatContainer />
+      <ChatContainer user={user} />
       <div className="swipe-container">
         <div className="card-container">
           {characters.map((character) => (
@@ -61,6 +101,7 @@ export const Dashboard = () => {
             </div>
         </div>
       </div>
-    </div>
+    </div>}
+    </>
   );
 };

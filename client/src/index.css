@@ -359,3 +359,7 @@ text-align: center;
     overflow-y:auto;
 
 }
+
+.log-out-icon {
+    cursor: pointer;
+}

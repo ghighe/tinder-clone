@@ -1,15 +1,27 @@
+/* eslint-disable no-unused-vars */
+import { useCookies } from "react-cookie";
+import {Navigate, useNavigate} from 'react-router-dom'
 
-export const ChatHeader = () => {
+export const ChatHeader = ({user}) => {
+const [cookies,setCookie, removeCookie] = useCookies(['user'])
+let navigate = useNavigate();
+
+    const logout = () => {
+       removeCookie("UserId", cookies.UserId);
+       removeCookie("AuthToken", cookies.AuthToken);
+       navigate("/");
+    }
+
 
     return (
         <div className="chat-container-header">
            <div className="profile">
                 <div className="img-container">
-                    <img src="" alt="" />
+                    <img src={user.url} alt=""/>
                 </div>
-                <h3>UserName</h3>
+                <h3>{user.first_name}</h3>
             </div>
-            <i className="log-out-icon"></i>
+            <i className="log-out-icon" onClick={logout}>logout</i>
         </div>
     )
 }

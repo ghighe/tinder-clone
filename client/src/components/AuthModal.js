@@ -36,9 +36,11 @@ export const AuthModal = ({setShowModal,isSignUp}) => {
             setCookie('UserId', response.data.userId);
             setCookie('AuthToken', response.data.token);
 
-
+            console.log(isSignUp);
             if(success && isSignUp) navigate('/onboarding');
             if(success && !isSignUp) navigate('/dashboard');
+
+            window.location.reload();
 
         }catch(error){
             console.log(error);

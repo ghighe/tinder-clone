@@ -59,7 +59,7 @@ app.post("/signup", async (req, res) => {
     } catch (error) {
         console.log(error);
     } finally {
-        dbAccess.close();
+        await dbAccess.close();
     }
 })
 
@@ -95,21 +95,43 @@ app.post("/login", async (req, res) => {
     }
 })
 
-app.get("/users", async (req, res) => {
-
-
+app.get("/gendered-user/:gender", async (req, res) => {
+    const selectedGender = req.params.gender;
     try {
         await dbAccess.connect();
         const database = dbAccess.db('app-data');
         const users = database.collection('users');
-        const getUsers = await users.find().toArray();
-        res.send(getUsers);
+        //query based on the gender
+        const query = {gender_interest:{$eq: selectedGender}};
+        const genderedUsers = await users.find(query).toArray();
+        res.send(genderedUsers);
+    }catch(error){
+        console.log(error);
+    }
+     finally {
+     await dbAccess.close();
+}
+});
+
+
+app.get("/user/:id", async (req,res) => {
+    //get the id from the url
+    const userId = req.params.id;
+
+    try {
+       await dbAccess.connect();
+       const database = dbAccess.db('app-data');
+       const users = database.collection('users');
+
+       const query = {user_id:userId};
+       const user = await users.findOne(query);
+       res.send(user);
     } catch (error) {
         console.log(error);
-    } finally {
-        await dbAccess.close();
+    }finally {
+      await dbAccess.close();
     }
-})
+});
 
 
 //update a user
