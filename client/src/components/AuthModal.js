@@ -13,14 +13,12 @@ export const AuthModal = ({setShowModal,isSignUp}) => {
     const [cookies,setCookie,removeCookie] = useCookies(['user']);
 
     let navigate = useNavigate();
-    console.log(email,password,confirmPassword,error);
     //handle the button click
     const handleClick = () => {
         setShowModal(false);
     }
     //handle the form on submit
     const handleSubmit = async (e) => {
-        console.log(email,password);
         e.preventDefault();
         try {
             if(isSignUp && (password !== confirmPassword)){
@@ -29,14 +27,12 @@ export const AuthModal = ({setShowModal,isSignUp}) => {
             }
 
             const response = await axios.post(`http://localhost:10000/${isSignUp ? 'signup': 'login'}`, {email,password});
-            console.log(response);
-            const success = response.status === 201
+            const success = response.status === 201;
 
             // setCookie('Email', response.data.email);
             setCookie('UserId', response.data.userId);
             setCookie('AuthToken', response.data.token);
 
-            console.log(isSignUp);
             if(success && isSignUp) navigate('/onboarding');
             if(success && !isSignUp) navigate('/dashboard');
 
@@ -44,6 +40,12 @@ export const AuthModal = ({setShowModal,isSignUp}) => {
 
         }catch(error){
             console.log(error);
+            if(isSignUp){
+                setError("User already exist, please login");
+            }else {
+                setError("Wrong credentials");
+            }
+
         }
     }
     return (

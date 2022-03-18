@@ -7,63 +7,67 @@ import { ChatContainer } from "../components/ChatContainer";
 import axios from "axios";
 
 export const Dashboard = () => {
+
+
   const [user, setUser] = useState(null);
-  const [genderedUsers, setGenderedUsers] = useState(null);
+  const [genderedUsers, setGenderedUsers] = useState([]);
   const [cookies, setCookie, removeCookie] = useCookies(['user']);
+  const [lastDirection, setLastDirection] = useState(null);
 
 const userId = cookies.UserId;
 //get user from the backend
-const getUser = async() => {
-  try {
-    const response = await axios.get(`http://localhost:10000/user/${userId}`);
-    setUser(response.data);
-  } catch (error) {
-    console.log(error)
-  }
-}
 
-const getGenderedUsers = async() => {
-    try {
-      const response = await axios.get(`http://localhost:10000/gendered-user/${user?.gender_interest}`);
-      setGenderedUsers(response.data);
-    } catch (error) {
-      console.log(error);
-    }
-}
+
+// const getUser = async() => {
+
+//   try {
+//     const response = await axios.get(`http://localhost:10000/user/${userId}`);
+//     setUser(response.data);
+//     console.log("user", user);
+//   } catch (error) {
+//     console.log(error)
+//   }
+// }
+
+//   const getGenderedUsers = async() => {
+
+//     try {
+//       const response =  await axios.get(`http://localhost:10000/gendered-users/${user?.gender_interest}`);
+//     console.log("getGenderedUsers ",response);
+//       setGenderedUsers(response.data);
+//     } catch (error) {
+//       console.log(error);
+//     }
+// }
 
   //call useEffect everytime the user change
-  useEffect(() => {
-      getUser();
-      getGenderedUsers();
-  },[user,genderedUsers])
 
-
-
-
-
-  const characters = [
-    {
-      name: "Richard Hendricks",
-      url: "https://i.imgur.com/Q9WPlWA.jpeg"
-    },
-    {
-      name: "Erlich Bachman",
-      url: "https://i.imgur.com/Q9WPlWA.jpeg"
-    },
-    {
-      name: "Monica Hall",
-      url: "https://i.imgur.com/Q9WPlWA.jpeg"
-    },
-    {
-      name: "Jared Dunn",
-      url: "https://i.imgur.com/Q9WPlWA.jpeg"
-    },
-    {
-      name: "Dinesh Chugtai",
-      url: "https://i.imgur.com/Q9WPlWA.jpeg"
+ useEffect(async () => {
+   console.log("useEffect run");
+  const getUser = async () => {
+    try {
+      return await axios.get(`http://localhost:10000/user/${userId}`)
+    }catch(error){
+      console.log(error);
     }
-  ];
-  const [lastDirection, setLastDirection] = useState();
+  };
+    const firstResponse = await getUser();
+    setUser(firstResponse.data);
+
+    const getGenderedUsers = async() => {
+      try {
+        return await axios.get(`http://localhost:10000/gendered-users/${firstResponse.data?.gender_interest}`)
+      } catch (error) {
+        console.log(error);
+      }
+  }
+  const secondResponse = await getGenderedUsers();
+  setGenderedUsers(secondResponse.data);
+
+ },[]);
+
+
+  const characters = [];
 
   const swiped = (direction, nameToDelete) => {
     console.log("removing: " + nameToDelete);
@@ -74,6 +78,7 @@ const getGenderedUsers = async() => {
     console.log(name + " left the screen!");
   };
 
+
   return (
     <>
     {user &&
@@ -81,12 +86,12 @@ const getGenderedUsers = async() => {
       <ChatContainer user={user} />
       <div className="swipe-container">
         <div className="card-container">
-          {characters.map((character) => (
+          {genderedUsers?.map((character) => (
             <TinderCard
               className="swipe"
-              key={character.name}
-              onSwipe={(dir) => swiped(dir, character.name)}
-              onCardLeftScreen={() => outOfFrame(character.name)}
+              key={character._id}
+              onSwipe={(dir) => swiped(dir, character.first_name)}
+              onCardLeftScreen={() => outOfFrame(character.first_name)}
             >
               <div
                 style={{ backgroundImage: "url(" + character.url + ")" }}
