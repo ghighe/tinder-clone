@@ -15,6 +15,7 @@ const dbAccess = new MongoClient(dbURL, {
     useNewUrlParser: true,
     useUnifiedTopology: true
 });
+
 const PORT = 10000;
 
 const app = express();
@@ -49,7 +50,7 @@ app.post("/signup", async (req, res) => {
     }
 
     //connect to MongoDB
-    const dbConnect = dbo.getDb();
+   const dbConnect = dbo.getDb();
     dbConnect
         .collection('users')
         .findOne(
@@ -101,7 +102,7 @@ app.post("/login", async (req, res) => {
             const token = jwt.sign(user, email, {
                 expiresIn: 60 * 24
             })
-            res.status(201).json({
+            res.status(200).json({
                 token,
                 userId: user.user_id
             })
@@ -123,7 +124,7 @@ app.get("/gendered-users/:gender", async (req, res) => {
         const users = database.collection('users');
         //query based on the gender
         const query = {
-            gender_interest: {
+            gender_identity: { //query to looks to those users which are women or man
                 $eq: selectedGender
             }
         };
@@ -192,4 +193,40 @@ app.put("/user", async (req, res) => {
     } finally {
         await dbAccess.close();
     }
+})
+
+app.put("/addmatch", async(req,res) => {
+    const {userId, matchUserId} = req.body;
+    const query = {user_id:userId};
+    const updateDocument = {
+    $push:{matches: {user_id:matchUserId}}
+    }
+    const dbConnect = dbo.getDb();
+    dbConnect
+    .collection('users')
+    .updateOne(query,updateDocument, (error) => {
+        if(error) {
+           res.status(400).send("Document was not updated!")
+        }else {
+            res.status(200).send("Update OK!");
+        }
+    })
+})
+
+app.get("/users", async (req,res) => {
+    const userIds = JSON.parse(req.query.userIds);
+    const dbConnect = dbo.getDb();
+    const dbUsers = dbConnect.collection('users')
+
+    const pipeline = [
+        {
+            '$match':{
+                'user_id': {'$in':userIds}
+            }
+        }
+    ]
+
+    const foundUsers = await dbUsers.aggregate(pipeline).toArray()
+    console.log(foundUsers);
+    res.send(foundUsers);
 })

@@ -14,63 +14,52 @@ export const Dashboard = () => {
   const [cookies, setCookie, removeCookie] = useCookies(['user']);
   const [lastDirection, setLastDirection] = useState(null);
 
-const userId = cookies.UserId;
+const userId = cookies.UserId; //get the userId which is currently logged in from cookies
+
 //get user from the backend
 
+const getUser = async () => {
+  try {
+    return await axios.get(`http://localhost:10000/user/${userId}`);
+  }catch(error){
+    console.log(error);
+  }
+}
 
-// const getUser = async() => {
-
-//   try {
-//     const response = await axios.get(`http://localhost:10000/user/${userId}`);
-//     setUser(response.data);
-//     console.log("user", user);
-//   } catch (error) {
-//     console.log(error)
-//   }
-// }
-
-//   const getGenderedUsers = async() => {
-
-//     try {
-//       const response =  await axios.get(`http://localhost:10000/gendered-users/${user?.gender_interest}`);
-//     console.log("getGenderedUsers ",response);
-//       setGenderedUsers(response.data);
-//     } catch (error) {
-//       console.log(error);
-//     }
-// }
+const getGenderedUsers = async(user) => {
+  try {
+      return await axios.get(`http://localhost:10000/gendered-users/${user?.gender_interest}`);
+  } catch (error) {
+    console.log(error);
+  }
+}
 
   //call useEffect everytime the user change
 
  useEffect(async () => {
-   console.log("useEffect run");
-  const getUser = async () => {
-    try {
-      return await axios.get(`http://localhost:10000/user/${userId}`)
-    }catch(error){
-      console.log(error);
-    }
-  };
-    const firstResponse = await getUser();
-    setUser(firstResponse.data);
-
-    const getGenderedUsers = async() => {
-      try {
-        return await axios.get(`http://localhost:10000/gendered-users/${firstResponse.data?.gender_interest}`)
-      } catch (error) {
-        console.log(error);
-      }
-  }
-  const secondResponse = await getGenderedUsers();
-  setGenderedUsers(secondResponse.data);
-
+  const userResponse = await getUser();
+  const genderUsersResponse = await getGenderedUsers(userResponse.data);
+  setUser(userResponse.data);
+  setGenderedUsers(genderUsersResponse.data);
  },[]);
 
 
-  const characters = [];
 
-  const swiped = (direction, nameToDelete) => {
-    console.log("removing: " + nameToDelete);
+ //logic for updateMaches
+ const updateMatches = async(matchUserId) => {
+    try {
+      await axios.put('http://localhost:10000/addmatch', {userId,matchUserId});
+      getUser().then((response) => setUser(response.data)); //update the user again on match
+      console.log("User which was updated ", user);
+    } catch (error) {
+      console.log(error);
+    }
+ }
+
+  const swiped = (direction, swipedUserId) => {
+    if(direction === 'right'){
+      updateMatches(swipedUserId);
+    }
     setLastDirection(direction);
   };
 
@@ -78,6 +67,11 @@ const userId = cookies.UserId;
     console.log(name + " left the screen!");
   };
 
+  const linkedUserIds = user?.matches.map(({user_id}) => user_id).concat(userId);
+
+  const filteredGenderUsers = genderedUsers?.filter(
+    genderedUser => !linkedUserIds.includes(genderedUser.user_id)
+  )
 
   return (
     <>
@@ -86,18 +80,18 @@ const userId = cookies.UserId;
       <ChatContainer user={user} />
       <div className="swipe-container">
         <div className="card-container">
-          {genderedUsers?.map((character) => (
+          {filteredGenderUsers?.map((genderedUsers) => (
             <TinderCard
               className="swipe"
-              key={character._id}
-              onSwipe={(dir) => swiped(dir, character.first_name)}
-              onCardLeftScreen={() => outOfFrame(character.first_name)}
+              key={genderedUsers._id}
+              onSwipe={(dir) => swiped(dir, genderedUsers.user_id)}
+              onCardLeftScreen={() => outOfFrame(genderedUsers.first_name)}
             >
               <div
-                style={{ backgroundImage: "url(" + character.url + ")" }}
+                style={{ backgroundImage: "url(" + genderedUsers.url + ")" }}
                 className="card"
               >
-                <h3>{character.name}</h3>
+                <h3>{genderedUsers.name}</h3>
               </div>
             </TinderCard>
           ))}
