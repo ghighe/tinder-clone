@@ -4,7 +4,8 @@ import axios from "axios";
 import { useState, useEffect } from "react";
 
 
-export const MatchesDisplay = ({matches}) => {
+export const MatchesDisplay = ({matches, setClickedUser}) => {
+    const [isLoading, setLoading] = useState(true);
     const [matchedProfiles, setMatchedProfiles] = useState([]);
 
 
@@ -18,21 +19,30 @@ export const MatchesDisplay = ({matches}) => {
                 }
             })
             setMatchedProfiles(response.data);
+            setLoading(false);
         } catch (error) {
             console.log(error);
         }
     }
 
     useEffect(() => {
-        getMatches();
+       getMatches();
     },[])
 
-
-    console.log(matchedProfiles);
+    if(isLoading) {
+        return <div className="matches-display">Getting data...</div>;
+     }
 
     return (
-        <div className = "matches-display" >
-
+        <div className = "matches-display">
+           {matchedProfiles.map((match,_index) => (
+               <div key={{_index}} className="match-card" onClick={() => setClickedUser(match)}>
+                 <div className="img-container">
+                     <img src={match.url} alt={match.first_name + " profile"} />
+                     </div>
+                     <h3>{match.first_name}</h3>
+               </div>
+           ))}
         </div>
     )
 }
