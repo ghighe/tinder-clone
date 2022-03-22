@@ -12,33 +12,69 @@ export const ChatDisplay = ({user,clickedUser}) => {
 
     const [isLoading, setLoading] = useState(true);
     const [usersMessages, setUsersMessages] = useState(null);
+    const [clickedUserMessages, setClickedUsersMessages] = useState(null);
 
     const getUsersMessages = async() => {
         try {
         const response = await axios.get('http://localhost:10000/messages', {
             params:{userId:userId, partnerUserId:partnerUserId}
         })
-            setUsersMessages(response.data);
-            setLoading(false);
+        setUsersMessages(response.data);
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    const getClickedUsersMessages = async() => {
+        try {
+        const response = await axios.get('http://localhost:10000/messages', {
+            params:{userId:partnerUserId, partnerUserId:userId}
+        })
+        setClickedUsersMessages(response.data);
         } catch (error) {
             console.log(error);
         }
     }
 
     useEffect(() => {
-      getUsersMessages();
+        getUsersMessages();
+        getClickedUsersMessages();
+        setLoading(false);
     },[])
 
     if(isLoading) {
         return (<div>UsersMessages fetching from DB...</div>);
     }
 
-    console.log("Users message is ", usersMessages);
+    const messages = [];
 
+    //format the messages for the users messages so we can have the avatar and the name in the newly created arr
+    usersMessages?.forEach(message => {
+       const formattedMessage = {};
+       formattedMessage['name'] = clickedUser?.first_name;
+       formattedMessage['img'] = clickedUser?.url;
+       formattedMessage['message'] = message.message;
+       formattedMessage['timestamp'] = message.timestamp;
+       messages.push(formattedMessage);
+    });
+
+    //format the messages for the clickedUsersMessages so we can have the avatar and the name in the newly created arr
+    clickedUserMessages?.forEach(message => {
+        const formattedMessage = {};
+        formattedMessage['name'] = user?.first_name;
+        formattedMessage['img'] = user?.url;
+        formattedMessage['message'] = message.message;
+        formattedMessage['timestamp'] = message.timestamp;
+        messages.push(formattedMessage);
+     });
+
+     const sortingDateMessages = messages?.sort((a,b) => a.timestamp.localeCompare(b.timestamp));
+
+    console.log("formattedMessage is ", messages);
 
       return (
           <>
-          <Chat />
+          <Chat sortingDateMessages={sortingDateMessages}/>
           <ChatInput />
           </>
       )
