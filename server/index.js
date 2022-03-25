@@ -9,8 +9,9 @@ const jwt = require('jsonwebtoken');
 const cors = require('cors');
 const bcrypt = require('bcrypt');
 const dbo = require('../server/db/conn');
+require('dotenv').config();
 
-const dbURL = 'mongodb+srv://ghighe:NM00sjiGLr3z5vIz@Cluster0.ytcoc.mongodb.net/Cluster0?retryWrites=true&w=majority'
+const dbURL = process.env.URL;
 const dbAccess = new MongoClient(dbURL, {
     useNewUrlParser: true,
     useUnifiedTopology: true
@@ -236,7 +237,7 @@ app.get("/users", async (req, res) => {
         }
     }]
 
-    const foundUsers = await dbUsers.aggregate(pipeline).toArray();
+    const foundUsers =  await dbUsers.aggregate(pipeline).toArray();
     res.send(foundUsers);
 })
 
@@ -255,4 +256,14 @@ app.get('/messages', async (req, res) => {
 
     const foundMessages = await messages.find(query).toArray();
     res.send(foundMessages);
+})
+
+
+app.post("/messages", async (req,res) => {
+    //get the message object from client side
+    const message = req.body.message;
+    const dbConnect = dbo.getDb();
+    const messages = dbConnect.collection('messages');
+    const insertedMessage = messages.insertOne(message)
+    res.send(insertedMessage)
 })

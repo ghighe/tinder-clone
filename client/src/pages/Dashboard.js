@@ -83,7 +83,7 @@ const getGenderedUsers = async(user) => {
           {filteredGenderUsers?.map((genderedUsers) => (
             <TinderCard
               className="swipe"
-              key={genderedUsers._id}
+              key={genderedUsers.user_id}
               onSwipe={(dir) => swiped(dir, genderedUsers.user_id)}
               onCardLeftScreen={() => outOfFrame(genderedUsers.first_name)}
             >

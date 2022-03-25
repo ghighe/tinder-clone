@@ -70,12 +70,13 @@ export const ChatDisplay = ({user,clickedUser}) => {
 
      const sortingDateMessages = messages?.sort((a,b) => a.timestamp.localeCompare(b.timestamp));
 
-    console.log("formattedMessage is ", messages);
-
       return (
           <>
           <Chat sortingDateMessages={sortingDateMessages}/>
-          <ChatInput />
+          <ChatInput user={user}
+                    clickedUser={clickedUser}
+                    getUsersMessages={getUsersMessages}
+                    getClickedUsersMessages={getClickedUsersMessages}/>
           </>
       )
 }

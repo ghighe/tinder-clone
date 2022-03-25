@@ -7,8 +7,6 @@ import { useState } from "react"
 export const ChatContainer = ({user}) => {
     const [clickedUser, setClickedUser] = useState(null);
 
-    console.log('clickedUser', clickedUser);
-
      return (
         <div className="chat-container">
             <ChatHeader user={user}/>

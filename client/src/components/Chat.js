@@ -1,5 +1,6 @@
 export const Chat = ({sortingDateMessages}) => {
     return (
+        <>
         <div className="chat-display">
             {sortingDateMessages.map((message,_index) => (
                 <div key={_index}>
@@ -13,5 +14,6 @@ export const Chat = ({sortingDateMessages}) => {
                 </div>
             ))}
         </div>
+        </>
     )
 }

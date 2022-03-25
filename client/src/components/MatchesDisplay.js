@@ -2,11 +2,15 @@
 /* eslint-disable no-unused-vars */
 import axios from "axios";
 import { useState, useEffect } from "react";
+import { useCookies } from "react-cookie";
 
 
 export const MatchesDisplay = ({matches, setClickedUser}) => {
     const [isLoading, setLoading] = useState(true);
     const [matchedProfiles, setMatchedProfiles] = useState([]);
+    const [cookies, setCookie, removeCookie] = useCookies(['user'])
+
+    const userId = cookies.UserId;
 
 
     const matchUserIds = matches.map(({user_id}) => user_id).filter(userId => userId !== null)
@@ -35,8 +39,8 @@ export const MatchesDisplay = ({matches, setClickedUser}) => {
 
     return (
         <div className = "matches-display">
-           {matchedProfiles.map((match,_index) => (
-               <div key={{_index}} className="match-card" onClick={() => setClickedUser(match)}>
+           {matchedProfiles?.map((match,_index) => (
+               <div key={match.user_id} className="match-card" onClick={() => setClickedUser(match)}>
                  <div className="img-container">
                      <img src={match.url} alt={match.first_name + " profile"} />
                      </div>
